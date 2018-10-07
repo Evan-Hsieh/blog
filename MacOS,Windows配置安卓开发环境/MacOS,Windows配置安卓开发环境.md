@@ -71,7 +71,10 @@ brew cask install java6
 ## 使用转发代理
 通过上面的介绍，可以知道转发代理并不限定请求的资源（镜像服务器只能返回已经复制的资源。），同时由于实时地将相应返回，故获取到的资源也是最新的。所以，如果条件允许，建议使用转发代理。
 
+配置完成后，能够使用浏览器访问部分原本无法访问的网站。记录下代理使用的端口，在下文配置Android Studio时使用。
+
 介绍转发代理的文章很多，本文就暂不做介绍了。
+
 
 ## 使用镜像服务器
 目前国内的镜像服务器一般由若干高校提供，主要有：
@@ -87,8 +90,7 @@ http://sdk.gdgshanghai.com 端口：8000
 IPv4: http://ubuntu.buct.edu.cn/ 端口：80
 IPv6: http://ubuntu.buct6.edu.cn/ 端口：80
 
-镜像服务器的特点是免费，但提供的资源有限。若在使用时发现无法下载，可以更换其他服务器。
-
+镜像服务器的特点是免费，但提供的资源有限。若在使用时发现无法下载，可以更换其他服务器。具体使用方法在下文中介绍。
 
 # 3. 安装Android Studio
 * 登录[安卓开发者网站](https://developer.android.com/studio/),点击下载Android Studio
@@ -100,10 +102,14 @@ IPv6: http://ubuntu.buct6.edu.cn/ 端口：80
 # 4. 下载Android SDK
 启动Android Studio时，若以前没有安装过Android SDK，则会无法启动。
 
-以Android Studio 3.2为例，在没有安装SDK的情况下，会提示用户选择代理。输入代理的host与端口，即可下载Android SDK。 
+以Android Studio 3.2为例，在没有安装SDK的情况下，会提示用户选择代理。输入代理的host与端口：
+* 若使用转发代理，则在host中输入127.0.0.1（即回环地址）与代理使用的端口号。
+* 若使用镜像服务器，则在host与端口中填写具体的镜像服务器url与端口。
+
+点击完成即可启动下载。
 
 ![img_downloadAndroidSdk](https://i.loli.net/2018/10/07/5bb9d56d9195b.png)
 
 下载完成后，即可正常启动。
 
-为了保证Android的一些工具（如adb)也能正常使用，需将Android SDK的两个子目录platform-tools与tools配置到环境变量PATH中。
+> 为了保证Android的一些工具（如adb)也能正常使用，需将Android SDK的两个子目录platform-tools与tools配置到环境变量PATH中。
