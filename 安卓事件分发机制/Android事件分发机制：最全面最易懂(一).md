@@ -1,26 +1,23 @@
 
+![欢迎关注程序引力](https://upload-images.jianshu.io/upload_images/14342329-427e24ec0260a5ec.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 本文介绍了安卓的事件分发机制。
 若有错漏，烦请斧正。转载请注明出处。
 * 作者：谢一 （Evan Xie）
 * 邮箱：evanyixie@gmail.com
 
 # 0. 前言
-鉴于安卓分发机制较为复杂，故分为两个层次进行讲解，分别为基础篇与高级篇。基础篇从现象与应用的角度去讲解分发机制的核心内容，高级篇从源码角度去分析分发机制背后的原因。
+鉴于安卓分发机制较为复杂，故分为多个层次进行讲解，分别为基础篇、实践篇与高级篇。
 
-本文内容为基础篇，在介绍了基本概念与核心分发逻辑的基础上，从伪代码与Demo的现象出发，总结事件分发的规律。避免了许多文章直接给初学者讲解源码所带来的困惑。本文深入浅出，通过阅读本文，可以帮助开发者对安卓事件分发机制有一个整体的了解，并且能够帮助开发者快速解决一些常见的实际问题，从而实现快速开发。
-
+* （一）基础篇：从基本概念入手，介绍了分发机制中的核心方法，通过分析其核心逻辑，总结其事件分发机制。
+* （二）实践篇：该篇设计了简单与复杂的两个demo样例，从现象与应用的角度去讲解分发机制的核心内容，帮助读者从另一个角度理解事件分发机制。
+* （三）高级篇：从源码角度去分析分发机制背后的原因，让读者对分发机制背后的本质有更为全面与深刻的理解。
 
 # 1. 内容简介
 
-本文总7个章节，除前言与内容简介外，其余各小节的内容简介如下：
+本文内容为（一）基础篇，本篇主要对被分发的对象与参与分发的组件等基本概念做了介绍。同时，介绍了负责分发的核心方法。从这些方法的核心逻辑伪代码中，总结事件分发的规律。避免了许多文章直接给初学者讲解源码所带来的困惑。
 
-* 第二节：介绍了安卓分发机制中，分发的对象是什么？
-* 第三节：介绍了分发这些事件的组件是什么。
-* 第四节：介绍了参与分发事件的核心方法。
-* 第五节：本文的核心章节，介绍了事件分发的过程。
-* 第六节：设计了一个简单的基本样例，从该样例的现象出发，得出一些规律。
-* 第七节：设计了一个较为复杂的样例，从该样例的现象处罚，得出一些结论。
-* 第八节：总结。
+本文深入浅出，通过阅读本文，可以帮助开发者对安卓事件分发机制有一个整体的了解，并且能够帮助开发者快速解决一些常见的实际问题，从而实现快速开发。
 
 # 2. 被分发的对象
 被分发的对象是那些？被分发的对象是用户触摸屏幕而产生的点击事件，事件主要包括：按下、滑动、抬起与取消。这些事件被封装成MotionEvent对象。
@@ -43,7 +40,7 @@
 ![事件分发者结构](https://i.loli.net/2018/10/08/5bbb5665bb58f.png)
 
 从上图中可以看出，Activity包括了ViewGroup，ViewGroup又可以包含多个View。
-![安卓分发事件U型图](undefined)
+
 | 组件 | 特点 | 举例 | 
 | :---: | :---: | :---: |
 | Activity | 安卓视图类 | 如MainActivity | 
@@ -173,217 +170,10 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
 该方法主要对事件进行处理，若返回True表示已经处理了事件，若返回False则表示没有对事件进行处理，需要继续传递事件。一般情况下，默认为FALSE。
 
 
+# 6. 总结
+本文在介绍了事件分发基本概念的基础上，介绍了负责参与事件分发的核心方法，包括dispatchTouchEvent()、onInterceptTouchEvent（）与onTouchEvent（）方法。通过伪代码的形式介绍了这些方法的核心逻辑，重点分析了在Activity、ViewGroup与View中的dispatchTouchEvent()方法。它们三者中的该方法结构类似，都是先调用子View的同名方法或者listener方法，然后再调用自身的onTouchEvent()方法。
 
-
-# 6. 基本样例分析
-经过上面对分发过程的介绍，相信读者对安卓事件的分发过程已经有了一个基本的了解。下面以一个最基本的布局为例，看看事件分发过程是否真的如此。
-![事件分发者结构](https://i.loli.net/2018/10/08/5bbb5665bb58f.png)
-
-布局文件如下：
-
-```
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="50dp"
-    tools:context=".lesson01.part01.OuterActivity">
-    
-    <com.evanxie.tutorial.lesson01.part01.LayoutX
-        android:background="@color/blue"
-        android:id="@+id/layout2"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <com.evanxie.tutorial.lesson01.part01.TextViewX
-            android:background="@color/colorAccent"
-            android:id="@+id/tv21"
-            android:layout_margin="90dp"
-            android:textSize="20sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-
-        <com.evanxie.tutorial.lesson01.part01.TextViewX
-            android:background="@color/colorAccent"
-            android:id="@+id/tv22"
-            android:layout_margin="90dp"
-            android:textSize="20sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-    </com.evanxie.tutorial.lesson01.part01.LayoutX>
-</LinearLayout>
-```
-
-对于Activity，主要是覆写了如下方法，方便查看日志：
-```
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        Log.i(TAG, "dispatchTouchEvent: ");
-        return super.dispatchTouchEvent(ev);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        Log.i(TAG, "onTouchEvent: ");
-        return super.onTouchEvent(event);
-    }
-```
-
-对于Layout(ViewGroup)，主要是覆写了如下方法：
-```
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        Log.i(TAG, "dispatchTouchEvent: " + getIdName());
-
-        return super.dispatchTouchEvent(ev);
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        Log.i(TAG, "onInterceptTouchEvent: " + getIdName());
-        return super.onInterceptTouchEvent(ev);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        Log.i(TAG, "onTouchEvent: " + getIdName());
-        return super.onTouchEvent(event);
-    }
-
-    private String getIdName() {
-        return getResources().getResourceEntryName(getId());
-    }
-```
-
-对于TextView，主要是覆写了如下方法：
-```
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        Log.i(TAG, "dispatchTouchEvent: " + getText());
-        return super.dispatchTouchEvent(event);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        Log.i(TAG, "onTouchEvent: " + getText());
-        return super.onTouchEvent(event);
-    }
-
-```
-
-点击其中的TextView，并筛选其dispatchTouchEvent方法的日志，得到如下日志：
-```
-L0101: OuterActivity: dispatchTouchEvent: 
-L0101: LayoutX: dispatchTouchEvent: layout2
-L0101: TextViewX: dispatchTouchEvent: TextView
-```
-
-从该日志可以看出，事件是从Activity -> Layout(ViewGroup) -> TextView(View)进行传播的。从这里可以看出，有些文章中指出的，事件是由内部View（如button）开始传播的，这是有误的。
-
-若取消前面的筛选，显示几个核心方法的日志，可以得到：
-```
-L0101: OuterActivity: dispatchTouchEvent: 
-L0101: LayoutX: dispatchTouchEvent: layout2
-L0101: LayoutX: onInterceptTouchEvent: layout2
-L0101: TextViewX: dispatchTouchEvent: TextView
-L0101: TextViewX: onTouchEvent: TextView
-L0101: LayoutX: onTouchEvent: layout2
-L0101: OuterActivity: onTouchEvent: 
-```
-从上面日志可以看出，Activity由于没有onInterceptTouchEvent()方法，所以在调用了dispatchTouchEvent()方法后，就调用了Layout的同名方法，但是在Layout却有所不同，它在调用dispatchTouchEvent()方法后，还调用了onInterceptTouchEvent()方法。
-
-因为我们并没有改变方法后，还调用了onInterceptTouchEvent（）方法的返回值，故该事件继续分发，传递给TextView在调用dispatchTouchEvent（）处理。若不能继续分发，则会调用onTouchEvent()方法，同时，该方法也不能处理的话，则会向上传播，调用ViewGroup、Activity的onTouchEvent方法。
-
-从这样的现象处罚，可以观察到如下结论：
-* 结论5.1：事件分发的顺序是 Activity -> Layout(ViewGroup) -> TextView(View)
-* 结论5.2：事件分发是一个递归调用的规程，通过dispatchTouchEvent（）进行递归调用。若考虑事件的整个传播过程，其分发的顺序是 Activity -> Layout(ViewGroup) -> TextView(View) -> Layout(ViewGroup) -> Activity.
-* 结论5.3：事件若分发到ViewGroup，则首先会调用其onInterceptTouchEvent()方法，若该方法返回TURE，则事件不会继续向下传递，而是交由其自身onTouchEvent()处理，然后可能由onTouchEvent()由下往上传递回去。
-
-
-# 7. 复杂样例分析
-在实际的项目中，布局结果往往不会仅仅是上面基本样例那样简单。实际情况是可能会存在多个布局嵌套。故本节以一个较为复杂的样例来分析事件分发过程，理解该复杂样例的分发机制，有利于帮助开发者在实际项目中解决实际问题。
-
-其Activity、Layout（ViewGroup）、与TextView的Java类代码与基本样例分析中的一致。唯独布局变得更为复杂，其布局示意图如下：
-![0102复杂样例布局图](https://i.loli.net/2018/11/03/5bddb91472057.png)
-
-对于该图中各空间的命名做如下约定：即 Name_X_Y。其中Name表示组件名，X表示层次，Y表示该层中第几个组件。对于TextView_2_3,表示位于第2层、第三个的TextView组件，对于Layout_3_4,表示处在第3层中第4个的Layout(ViewGroup)组件。最外层为第一层，向内一次递增。
-
-为了更好地理解这些组件的关系，将它们绘制成树状图。其树状图如下：
-![0102复杂样例布局树状图](https://i.loli.net/2018/11/03/5bddb926b895f.png)
-
-从树状图中，可以清晰地看到该布局中有4层，第一层为一个Layout（ViewGroup），其内部有4个组件，分别是2个Layout（ViewGroup）与TextView。其余的组件关系也非常清晰。该复杂样例在设计时，考虑了ViewGroup多层嵌套的情况，通过该该样例的实验，可以对安卓事件分发机制有更深刻的理解，对于解决实际安卓应用的事件分发问题有一定的借鉴意义。
-
-将该样例的代码运行起来后，点击TextView_4_3，设置筛选条件，只查看dispatchTouchEvent()方法的日志，得到相应的日志输出，结果如下
-```
-L0102: OuterActivity: dispatchTouchEvent: 
-L0102: LayoutX: dispatchTouchEvent: Layout_1
-L0102: LayoutX: dispatchTouchEvent: Layout_2_2
-L0102: LayoutX: dispatchTouchEvent: Layout_3_4
-L0102: TextViewX: dispatchTouchEvent: TextView_4_3
-```
-从该日志输出可以看出，分发事件从最外部的OuterActivity开始，然后传递第1层的Layout_1，然后依次传给Layout_2_2 -> Layout_3_4 -> TextView_4_3.
-
-若将参与分发的组件用橙色标识出来，其传递的路径如下图所示：
-![0102复杂样例布局树状点击图](https://i.loli.net/2018/11/03/5bddb934d6384.png)
-
-从这样的结果可以看出，事件在复杂布局的情况下，并没有去遍历每一个子组件。
-
-> 对于网络上的部分教程，其表示事件在传播时会遍历子View，这是比较模糊的。部分教程表示会ViewGroup会遍历其子View的dispatchTouchEvent()方法，那这可以说是有误的。
-
-事实上，在一般情况下，ViewGroup并不会遍历其View的dispatchTouchEvent()方法，而像是”知道“被点击的子View的最短路径一样，通过该路径去分发事件，并让事件抵达被点击的组件。对于这个树状图，其余兄弟节点的组件的dispatchTouchEvent()方法并不会被调用。这是一个非常重要的结论。
-
-从该现象出发，可以得到结论：
-* 结论6.1：在一般情况下，可以认为事件分发是以‘最短路径’来分发的。
-
-> 实际上，在源码中会判断点击的位置坐标是否处于其他组件的范围内，如果在点击位置的坐标在其范围之外，则不会去调用其dispatchTouchEvent()。这也就是上面结论的原因。除了一些较为特殊的情况，例如在同一层的组件存在重叠的情况下，其兄弟组件的dispatchTouchEvent()方法是可能被调用的。在一般情况下，就可以认为事件分发是以‘最短路径’来分发的。
-
-若将日志的筛选条件去掉，点击TextView_4_3的日志如下所示：
-```
-L0102: OuterActivity: dispatchTouchEvent: 
-L0102: LayoutX: dispatchTouchEvent: Layout_1
-L0102: LayoutX: onInterceptTouchEvent: Layout_1
-L0102: LayoutX: dispatchTouchEvent: Layout_2_2
-L0102: LayoutX: onInterceptTouchEvent: Layout_2_2
-L0102: LayoutX: dispatchTouchEvent: Layout_3_4
-L0102: LayoutX: onInterceptTouchEvent: Layout_3_4
-L0102: TextViewX: dispatchTouchEvent: TextView_4_3
-L0102: TextViewX: onTouchEvent: TextView_4_3
-L0102: LayoutX: onTouchEvent: Layout_3_4
-L0102: LayoutX: onTouchEvent: Layout_2_2
-L0102: LayoutX: onTouchEvent: Layout_1
-L0102: OuterActivity: onTouchEvent: 
-L0102: OuterActivity: dispatchTouchEvent: 
-L0102: OuterActivity: onTouchEvent: 
-```
-
-从该日志可以印证前面的结论，事件从Activity想多个ViewGroup分发，最终抵达TextView，若没有组件能处理该事件，则通过onTouchEvent传递回去。
-
-请注意日志的最后两行，似乎又有事件开始传递。实际上，前面一起的传递过程是‘按下’事件的传递过程，也是本文默认讨论的事件。最后两行是‘抬起’事件的传递过程。因为‘按下’事件在自上向下，又自下向上传递后，都没有组件能够处理，故默认Activity将该事件处理了。而对于‘按下’事件之后的其他事件，如‘抬起’事件，则默认交给处理了‘按下’事件的组件。
-
-* 结论6.2：在一个事件序列（事件流）中，第一个事件（按下）被哪个组件处理了，那后续事件都会被直接交给这个组件处理。
-
-再进行一次点击事件，此时不在点击TextView_4_3，而是点击布局图中仅仅属于Layout_2_2的绿色区域，得到的日志输出如下：
-```
-L0102: OuterActivity: dispatchTouchEvent: 
-L0102: LayoutX: dispatchTouchEvent: Layout_1
-L0102: LayoutX: onInterceptTouchEvent: Layout_1
-L0102: LayoutX: dispatchTouchEvent: Layout_2_2
-L0102: LayoutX: onInterceptTouchEvent: Layout_2_2
-L0102: LayoutX: onTouchEvent: Layout_2_2
-L0102: LayoutX: onTouchEvent: Layout_1
-L0102: OuterActivity: onTouchEvent: 
-```
-从该现象可以看出，事件传递到Layout_2_2后，就不会再继续向下传播了，哪怕它还有许多子View。
-
-* 结论6.3：当事件分发的被点击的组件时，则停止传播。不管这个组件是否还有子组件。
-
-# 8. 总结
-本文从事件分发的核心方法出发，重点分析了其核心的分发逻辑。又从实验的角度，设计了分别是较为基础的与较为复杂的两种样例，从该实验的现象出发，得出了若干结论。通过对这些结论的思考，可以帮助读者更深刻地理解安卓事件的分发机制，此时思考上文中的事件分发的核心方法逻辑，会发现其实安卓的事件分发机制原来如此简单。
+这些方法在调用关系中体现了一个类似‘递归’的调用过程，通过dispatchTouchEvent（）将事件传递下去，又通过onTouchEvent()将事件传递上来。中间的这一过程可以通过让onInterceptTouchEvent方法（对于ViewGroup），或者另外的负责分发的方法返回TRUE，均可以提前终止这一类似’递归‘的调用过程，进而让事件的处理符合我们的预期。
 
 
 > 若有错漏，烦请斧正。转载请注明出处。
