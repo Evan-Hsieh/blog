@@ -1,5 +1,4 @@
-
-![欢迎关注程序引力](https://upload-images.jianshu.io/upload_images/14342329-427e24ec0260a5ec.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![欢迎关注程序引力](https://upload-images.jianshu.io/upload_images/14342329-acd327916ea5ec23.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 本文介绍了安卓的事件分发机制。
 若有错漏，烦请斧正。转载请注明出处。

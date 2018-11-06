@@ -1,5 +1,8 @@
+![欢迎关注程序引力](https://upload-images.jianshu.io/upload_images/14342329-acd327916ea5ec23.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-本文介绍了安卓开发环境的配置方法。若有错漏，烦请斧正。转载请注明出处。
+想进行移动应用（安卓）开发吗？本文作为最基础教程指导初学者安装与配置Android开发环境。
+
+若有错漏，烦请斧正。转载请注明出处。
 * 作者：谢一 （Evan Xie）
 * 邮箱：evanyixie@gmail.com
 
