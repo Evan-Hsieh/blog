@@ -3,7 +3,7 @@
 想进行移动应用（安卓）开发吗？本文作为最基础教程指导初学者安装与配置Android开发环境。
 
 若有错漏，烦请斧正。转载请注明出处。
-* 作者：谢一 （Evan Xie）
+* 作者：程序引力 | 谢一 （Evan Xie）
 * 邮箱：evanyixie@gmail.com
 
 # 0. 内容简介
@@ -115,3 +115,7 @@ IPv6: http://ubuntu.buct6.edu.cn/ 端口：80
 下载完成后，即可正常启动。
 
 > 为了保证Android的一些工具（如adb)也能正常使用，需将Android SDK的两个子目录platform-tools与tools配置到环境变量PATH中。
+
+> 若有错漏，烦请斧正。转载请注明出处。
+> * 作者：程序引力 | 谢一 （Evan Xie）
+> * 邮箱：evanyixie@gmail.com

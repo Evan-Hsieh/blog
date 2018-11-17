@@ -1,8 +1,10 @@
 ![欢迎关注程序引力](https://upload-images.jianshu.io/upload_images/14342329-acd327916ea5ec23.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-本文介绍了安卓的事件分发机制。
+如何提升安卓水平？安卓开发者必须了解的事件分发机制。
+最全面、最易懂的形式来讲解Android事件分发机制。
+
 若有错漏，烦请斧正。转载请注明出处。
-* 作者：谢一 （Evan Xie）
+* 作者：程序引力 | 谢一 （Evan Xie）
 * 邮箱：evanyixie@gmail.com
 
 # 0. 前言
