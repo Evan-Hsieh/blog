@@ -7,7 +7,7 @@
 > * 邮箱：evanyixie@gmail.com
 
 
-# JUnit
+### JUnit
 JUnit为Java最为著名的单元测试框架，在Java以及安卓开发中应用广泛。一般情况下，我们并不需要手动对JUnit进行配置。在Android Studio中创建工程时，IDE会自动在app/src/test目录下自动创建测试代码，并在build.gradle中生成相应的依赖。若需要手动添加，可以打开模块（如app）目录中的build.gradle,添加如下依赖即可。
 ```
 dependencies {
@@ -16,7 +16,7 @@ dependencies {
 }
 ```
 
-## 手动创建测试类
+#### 手动创建测试类
 若要创建自己的测试代码，在app模块下的build.gradle中添加上述依赖后，只需要打开测试的类（例如选择MainActivity），然后执行：
 * Ctrl + Shift + T （或 cmd + shift + T )弹出对话框；
 * 选择Create New Test，或者直接点击回车；
@@ -69,7 +69,7 @@ public void testAdd() {
 
 上面的语句除了assertThat以外，都有与之匹配的“相反”作用的语句，如assertTrue有assertFalse、assertNull有assertNotNull与之配对。
 
-## 撰写单元测试的基本步骤和思路
+#### 撰写单元测试的基本步骤和思路
 在了解了这些断言语句后，对于写单元测试代码就一点也不难了。大致可以分为如下几步：
 * 创建测试类代码：参考上文的方法。
 * 撰写初始化代码：检查是否有需要进行的初始化工作，若需要的话，在相应的初始化方法上添加@Before或@BeforeClass注解。
@@ -81,7 +81,7 @@ public void testAdd() {
 > 时刻记住，其实测试代码与普通的Java代码没有本质什么区别
 
 
-# AndroidUnitRunner
+### AndroidUnitRunner
 通过上文的介绍可知，若仅使用JUnit，则只能测试纯Java代码。但是在安卓开发中，许多代码或多或少都会有安卓依赖，这时则可以通过AndroidUnitRunner来实现测试代码。
 
 AndroidUnitRunner的测试代码需要运行在真机或模拟器上，故该测试也被称作设备测试（Instrumented Test）。在使用AndroidUnitRunner前，需要在build.grdle中添加依赖
@@ -107,7 +107,7 @@ public class ExampleInstrumentedTest {
 
 其中@Test注解的方法为需要进行单元测试的方法。在该方法中，通过InstrumentationRegistry即可获取当前应用的上下文Context，拿到context对象，就可以做许多与安卓相关的操作了。在本例中是通过该对象可以获取应用包名，然后通过断言判断是否预期一致。
 
-## InstrumentationRegistry
+#### InstrumentationRegistry
 通过上面的例子可以知道，要进行与安卓库有关的测试，获取应用的context以及相关对象是非常重要的。而获取的方式即为通过InstrumentationRegistry获取。
 
 InstrumentationRegistry作为对外暴露的接口，允许调用者获取设备信息，包括对设备的引用、应用的上下文以及参数等。InstrumentationRegistry提供的都是静态方法，包括：
@@ -128,7 +128,7 @@ InstrumentationRegistry作为对外暴露的接口，允许调用者获取设备
 
 对于getTargetContext()方法，即获取的是待测试应用的上下文。对于getContext()方法，获取的是执行测试逻辑的应用上下文。
 
-# 总结
+### 总结
 对Android本地测试与设备测试的两种主要框架做了简要介绍，分别是JUnit与AndroidUnitRunner。在讲解AndroidStudio中创建测试类的方法后，概括了撰写测试代码的记录思路，以及JUnit的主要注解。同时，介绍了AndroidUnitRunner框架的使用方法，以及InstrumentationRegistry主要接口，进而让开发者能够有能力撰写基本的测试用例。
 
 > 若你喜欢本文或觉得有所帮助，请点赞或关注。
