@@ -16,6 +16,8 @@ Docker version 18.09.0, build 4d60db4
 ```
 显示版本为18.09，表示安装成功。
 
+> 若显示Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running? 只需要双击Docker图标即可。或通过命令行命令启动Docker服务。
+
 ### Docker核心操作
 
 #### 镜像与仓库交互命令
@@ -38,7 +40,7 @@ Login Succeeded
  ~ # docker logout
 Removing login credentials for https://index.docker.io/v1/
 ```
-使用login命令后，输入用户名与密码即可登录，只用logout即可退出。
+使用login命令后，输入用户名与密码即可登录。通过logout命令，即可退出。
 
 * 搜索/下载镜像
 
@@ -104,16 +106,7 @@ c1bbd66a1bf9
 ~ # docker restart c1bbd66a1bf9
 c1bbd66a1bf9
 ```
-* rm
 
-在容器没有运行的情况下，可以使用rm删除容器，并查看容器是否还存在
-```
-~ # docker restart c1bbd66a1bf9
-c1bbd66a1bf9
-~ # docker ps -a
-CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
-```
-从上面的结果中可以看到，目前已经没有容器。
 
 * create
 
@@ -168,20 +161,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 ```
 使用-d参数是让容器在后台运行，-t使用伪终端，并且在伪终端会在后台一直运行，所以执行ps查看其STATUS就不是Exited了，并且执行exec也不会报错了。
 
-* pause/unpause
-```
- ~ # docker pause 6e053b799fb2
-6e053b799fb2
- ~ # docker ps -a
-CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
-6e053b799fb2        centos:latest       "/bin/bash"         8 minutes ago       Up 8 minutes (Paused)                           cranky_chatterjee
- ~ # docker unpause 6e053b799fb2
-6e053b799fb2
- ~ # docker ps -a
-CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
-6e053b799fb2        centos:latest       "/bin/bash"         8 minutes ago       Up 8 minutes                                    cranky_chatterjee
-```
-通过使用pause命令可以暂停容器中的所有进程，容器的状态会变为（Paused)，使用unpause即可恢复。
+
 
 * kill 
 
@@ -197,8 +177,60 @@ cd19eaf270b0
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
 cd19eaf270b0        centos:latest       "/bin/bash"         13 seconds ago      Exited (137) 1 second ago                       peaceful_ramanujan
 ```
-通过run重建一个容器后，可以通过kill杀死一个正在运行的容器。
+通过run重建一个容器后，可以通过kill杀死一个正在运行的容器,容器的状态变为Exited。
+
+* rm
+
+在容器没有运行的情况下，可以使用rm删除容器，并查看容器是否还存在
+```
+~ # docker rm c1bbd66a1bf9
+c1bbd66a1bf9
+~ # docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+```
+从上面的结果中可以看到，目前已经没有容器。
 
 
+* pause/unpause
+
+```
+ ~ # docker pause 6e053b799fb2
+6e053b799fb2
+ ~ # docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
+6e053b799fb2        centos:latest       "/bin/bash"         8 minutes ago       Up 8 minutes (Paused)                           cranky_chatterjee
+ ~ # docker unpause 6e053b799fb2
+6e053b799fb2
+ ~ # docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
+6e053b799fb2        centos:latest       "/bin/bash"         8 minutes ago       Up 8 minutes                                    cranky_chatterjee
+```
+通过使用pause命令可以暂停容器中的所有进程，容器的状态会变为（Paused)，使用unpause即可恢复。
+
+#### 容器操作命令
+* ps ：列出所有容器信息
+* inspect ： 获取容器/镜像的元数据
+* top ： 查看容器中运行的进程信息
+* attach ： 连接到正在运行的容器
+* events ： 从服务器获取事件
+* logs ： 从容器获取日志
+* wait ： 阻塞运行直到容器停止，并打印它的退出代码
+* export ： 将文件系统作为一个tar归档文件导出到STDOUT。
+* port ： 列出指定的容器的端口映射，或者查找将PRIVATE_PORT NAT到面向公众的端口。
+
+#### 实践操作范例
+* ps 
+
+非常常用的命令，可以列出所有容器的信息，支持的参数有：
+```
+-a :显示所有的容器，包括未运行的。
+-f :根据条件过滤显示的内容。
+--format :指定返回值的模板文件。
+-l :显示最近创建的容器。
+-n :列出最近创建的n个容器。
+--no-trunc :不截断输出。
+-q :静默模式，只显示容器编号。
+-s :显示总的文件大小。
+```
 
 
