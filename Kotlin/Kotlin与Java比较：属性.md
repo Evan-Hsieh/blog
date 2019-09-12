@@ -78,7 +78,7 @@ public class Data{
 * Kotlin
 ```
 class Data{
-    val str:String = "hello"
+    var str:String = "hello"
     get() = "world"
 }
 ```
@@ -89,18 +89,29 @@ class Data{
 var data = Data()
 var anotherStr = data.str
 ```
-即在Kotlin中，通过点.操作符，就可以代用getter方法，在被赋值时，就调用了setter方法。
+即在Kotlin中，通过点.操作符，就可以代用getter方法，这个值可以与成员的值不一致。
+在被赋值时，就调用了setter方法。
 
 ### 改变属性访问范围
+| 访问控制符 | Java类 | Kotlin类 | Kotlin顶层声明 |
+| :--: | :--: | :--: | :--: |
+| public | 所有地方可见 | 所有地方可见 | 所有地方可见 |
+| protected | 子类可见 | 子类可见 | NA |
+| private | 本类可见 | 本类可见 | 本文件可见 |
+| internal | NA | 模块可见 | 模块可见 |
+| default | 包可见 | 所有地方可见 | 所有地方可见 |
+
+> 一个模块就是一组一起编译的Kotlin文件。，这可能是一个intellij IDEA模块、一个Eclipse项目、一个Maven或 Gradle项目或者一组使用调用ant任务进行编译的文件
+
 * Java
 ```
 private String str = "abc";
 ```
 * Kotlin
 ```
-var str: String = "abc"
+protected var str: String = "abc"
     private set // 此访问器私有的并且有默认实现
-    private get // 此访问器私有的并且有默认实现
+    protected get // 此访问器子类可见并且有默认实现
 ```
 若要修改Kotlin属性的访问访问，可以在set或get前添加修饰符，如果后面没有覆盖其实现，它则保留默认实现。
 
@@ -142,7 +153,20 @@ public class Person{
 ```
 从转换后的Java代码可以看出，对于getName与setName是无限递归的。为此，提出了幕后字段。
 
-幕后字段即field关键字声明的字段，该字段表示该属性真正的值，上面一段Java代码对应的Kotlin代码应该为：
+幕后字段即field关键字声明的字段，该字段表示该属性真正的值，上面一段Java代码与正确的Kotlin代码的对应关系为：
+Java代码：
+```
+public class Person{
+    private String name = "abc"
+    public getName(){
+        return name;
+    }
+    public setName(String name){
+        this.name = name;
+    }
+}
+```
+Kotlin代码
 ```
 class Person{
     var name: String?=null
@@ -151,4 +175,115 @@ class Person{
         field = value
     }
 }
+```
+
+#### 幕后字段定义
+在Kotlin中, 如果属性至少一个访问器使用默认实现，那么Kotlin会自动提供幕后字段，用关键字field表示，幕后字段主要用于自定义getter和setter中，并且只能在getter 和setter中访问。
+
+对于Kotlin自动提供幕后字段，有：
+```
+// 例子一
+class Person {
+    var name:String = ""
+        get() = field 
+        set(value) {
+            field = value
+        }
+}
+// 例子二
+class Person {
+    var name:String = ""
+}
+```
+上面两个属性的声明是等价的，例子一中的getter和setter 就是默认的getter和setter。其中幕后字段field指的就是当前的这个属性，它不是一个关键字，只是在setter和getter的这个两个特殊作用域中有着特殊的含义，就像一个类中的this,代表当前这个类。
+
+#### 幕后字段使用场景
+用幕后字段，我们可以在getter和setter中做很多事，一般用于让一个属性在不同的条件下有不同的值，比如下面这个场景：
+```
+class Person(var gender:Gender){
+    var name:String = ""
+        set(value) {
+            field = when(gender){
+                Gender.MALE -> "Jake.$value"
+                Gender.FEMALE -> "Rose.$value"
+            }
+        }
+}
+
+enum class Gender{
+    MALE,
+    FEMALE
+}
+
+fun main(args: Array<String>) {
+    // 性别MALE
+    var person = Person(Gender.MALE)
+    person.name="Love"
+    println("打印结果:${person.name}")
+    //性别：FEMALE
+    var person2 = Person(Gender.FEMALE)
+    person2.name="Love"
+    println("打印结果:${person2.name}")
+}
+
+
+// 打印结果:Jake.Love
+// 打印结果:Rose.Love
+```
+如上，我们实现了name 属性通过gender 的值不同而行为不同。幕后字段大多也用于类似场景。
+
+#### 拥有幕后字段条件
+需要满足下面条件之一：
+* 使用默认 getter / setter 的属性，一定有幕后字段。对于 var 属性来说，只要 getter / setter 中有一个使用默认实现，就会生成幕后字段；
+* 在自定义 getter / setter 中使用了 field 的属性
+
+没有幕后字段的例子
+```
+class NoField {
+    var size = 0
+    //isEmpty没有幕后字段
+    var isEmpty
+        get() = size == 0
+        set(value) {
+            size *= 2
+        }
+}
+```
+如上，isEmpty是没有幕后字段的，重写了setter和getter,没有在其中使用 field
+
+### 幕后属性
+有时候有这种需求，我们希望一个属性：对外表现为只读，对内表现为可读可写，我们将这个属性成为幕后属性。 如：
+```
+private var _table: Map<String, Int>? = null
+public val table: Map<String, Int>
+    get() {
+        if (_table == null) {
+            _table = HashMap() // 类型参数已推断出
+        }
+        return _table ?: throw AssertionError("Set to null by another thread")
+    }
+```
+将_table属性声明为private,因此外部是不能访问的，内部可以访问，外部访问通过table属性，而table属性的值取决于_table，这里_table就是幕后属性。
+
+> 其中?:为 Elvis Operator，当其前面的变量不会空时，返回该变量，若其为空时，返回右侧表达式的值。
+
+幕后属性这中设计在Kotlin 的的集合Collection中用得非常多，Collection 中有个size字段，size 对外是只读的，size的值的改变根据集合的元素的变换而改变，这是在集合内部进行的，这用幕后属性来实现非常方便。
+
+如Kotlin AbstractList中SubList源码：
+```
+private class SubList<out E>(private val list: AbstractList<E>, private val fromIndex: Int, toIndex: Int) : AbstractList<E>(), RandomAccess {
+        // 幕后属性
+        private var _size: Int = 0
+
+        init {
+            checkRangeIndexes(fromIndex, toIndex, list.size)
+            this._size = toIndex - fromIndex
+        }
+        override fun get(index: Int): E {
+            checkElementIndex(index, _size)
+            return list[fromIndex + index]
+        }
+
+        override val size: Int get() = _size
+    }
 ```

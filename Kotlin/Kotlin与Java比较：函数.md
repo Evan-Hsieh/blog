@@ -28,6 +28,9 @@ fun double(x: Int): Int {
 }
 ```
 
+> Kotlin编程规范：Note: In Kotlin, semicolons are optional, and therefore line breaks are significant. Omit semicolons whenever possible.
+> [Kotlin Style Guide](https://developer.android.com/kotlin/style-guide)
+
 ### 函数参数
 在程序语言中，函数参数可以分为两类，分别是位置参数与命名参数。
 
@@ -89,7 +92,7 @@ fun getGravity(m:Float, g:Float = 9.8){
 ```
 通过该例子可以看到，使用默认参数非常简单，只需要在参数列表中添加‘=赋值表达式’即可。
 
-对于继承的情况，覆盖方法总是使用与基类型方法相同的默认参数值。 当覆盖一个带有默认参数值的方法时，必须从签名中省略默认参数值：
+对于继承的情况，覆盖方法总是使用与基类型方法相同的默认参数值。 当覆盖一个带有默认参数值的方法时，必须从签名中省略默认参数值,子类的该方法中使用与基类该方法一样的默认值。不省略该默认参数值的话，IDE会报错：
 ```
 open class A {
     open fun foo(i: Int = 10) { …… }
@@ -130,7 +133,7 @@ fun printHello(name: String?) { …… }
 在Java中不支持单表达式函数，更不能将函数赋值给变量。
 
 * Kotlin
-支持单表达式函数。当函数返回单个表达式时，可以省略花括号并且在 = 符号之后指定代码体即可：
+支持单表达式函数。当函数返回单个表达式时，可以省略花括号并且在 = 符号之后指定表达式即可：
 ```
 fun double(x: Int): Int = x * 2
 ```
@@ -138,7 +141,26 @@ fun double(x: Int): Int = x * 2
 ```
 fun double(x: Int) = x * 2
 ```
-> 具有块代码体的函数必须始终显式指定返回类型,因为块代码体中逻辑较为复杂，对于编译器或者开发者来说都不易去做类型推断。只有在块代码体需要返回Unit类型时，才无需显示指定返回类型。
+> * 单表达式函数通过 = 号分隔
+> * 单表达式函数若与花括号并用，返回的是lambda表达式
+> * 单表达式不能与return混用
+> * 花括号表示的函数若没有return语句，返回的是Unit
+> * 花括号表示的函数若使用return语句，需要申明函数返回值(Unit的返回值除外)
+下面是一些有趣的一些例子
+```
+fun double1(x : Int)  = x * 2 // 返回值符合预期
+
+fun double2(x : Int)  = {x * 2} // 返回 () -> kotlin.Int
+
+// fun double4(x : Int) = {return x * 2} // 报错
+
+fun double3(x : Int) {x * 2} // 返回 kotlin.Unit
+
+// fun double5(x : Int) {return x * 2} // 报错
+
+fun double6(x : Int): Int {return x * 2} // 返回值符合预期
+```
+
 
 ### 可变数量参数
 #### 可变数量参数基础
@@ -179,7 +201,7 @@ public static void dealArray(int... intArray){  //参数是可变数量的
 int[] intArray = {1, 2, 3};        
 dealArray(intArray);  //通过编译，正常运行  
 ```
-但是对于数组参数的函数，是不兼容可变参数的，例如：
+但是反过来，对于数组参数的函数，是不兼容可变参数的，例如：
 ```
 public static void dealArray(int[] intArray){  //参数是数组
     for (int i : intArray){xxx}
@@ -230,7 +252,7 @@ fun method() {
 fun dfs(graph: Graph) {
     val visited = HashSet<Vertex>()
     fun dfs(current: Vertex) {
-        if (!visited.add(current)) return
+        if (!visited.add(current)) return    // 已存在该元素则返回false. 局部函数可以访问外部函数的visited变量。
         for (v in current.neighbors)
             dfs(v)
     }

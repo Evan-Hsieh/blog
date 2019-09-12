@@ -14,7 +14,11 @@ public class NewCalculator extends Calculator{
     }
 }
 ```
-即通过自定义一个新的类去继承原有的类，并且在新的类中扩展方法。在这之后，还需要将初始化或声明原本类的地方都修改为这个新的类。如果涉及的地方较多，所消耗的时间和精力不容小觑。
+通过自定义一个新的类去继承原有的类，并且在新的类中扩展方法。在这之后，还需要将初始化或声明原本类的地方都修改为这个新的类。如果涉及的地方较多，所消耗的时间和精力不容小觑。
+
+同样，例如在Android开发中，需要为某个布局的方法添加一行日志，需要新建一个自定义的类继承该布局，并覆写方法。对应的xml布局文件也要修改。引用该布局对应类的地方也要做修改。由此可见，想要在Java中进行扩展是十分耗时耗力的。
+
+
 
 * Kotlin
 为了解决Java中扩展的麻烦，Kotlin提供了更为容易的扩展机制。其不仅支持方法扩展，还支持属性扩展。下面以方法扩展为例子：
@@ -83,3 +87,75 @@ fun printFoo(c: C) {
 printFoo(D())
 ```
 按照以理解Java代码的思路，应该打印d,但实际上，该例子最终会输出c。原因是printFoo方法的参数类型是C，故扩展方法对应的也是C的扩展方法。即扩展方法是静态解析的。
+
+### 扩展声明为成员
+* Java
+
+* Kotlin
+一般的情况下，是在顶层文件中声明扩展。但是。在一个类内部你可以为另一个类声明扩展。在这样的扩展内部，有多个 隐式接收者 —— 其中的对象成员可以无需通过限定符访问。扩展声明所在的类的实例称为 分发接收者，扩展方法调用所在的接收者类型的实例称为 扩展接收者。
+
+```
+class Host(val hostname: String) {
+    fun printHostname() { print(hostname) }
+}
+
+class Connection(val host: Host, val port: Int) {
+     fun printPort() { print(port) }
+
+     fun Host.printConnectionString(p: Int) {
+         printHostname()   // calls Host.printHostname()
+         print(":")
+         printPort()   // calls Connection.printPort()
+     }
+
+     fun connect() {
+         /*……*/
+         host.printConnectionString(port)   // calls the extension function
+     }
+}
+
+fun main() {
+    Connection(Host("kotl.in"), 443).connect()
+    //Host("kotl.in").printConnectionString(443)  // error, the extension function is unavailable outside Connection
+}
+```
+若某个扩展的声明时在类的内部（即作为类的成员），它同样可以声明被open，并且被子类覆盖。下面的例子展示了函数的分发对于分发接收者类型是虚拟的（多态的），但对于扩展接收者类型是静态的。
+
+```
+open class Base { }
+
+class Derived : Base() { }
+
+open class BaseCaller {
+    open fun Base.printFunctionInfo() {
+        println("Base extension function in BaseCaller")
+    }
+
+    open fun Derived.printFunctionInfo() {
+        println("Derived extension function in BaseCaller")
+    }
+
+    fun call(b: Base) {
+        b.printFunctionInfo()   // 调用扩展函数
+    }
+}
+
+class DerivedCaller: BaseCaller() {
+    override fun Base.printFunctionInfo() {
+        println("Base extension function in DerivedCaller")
+    }
+
+    override fun Derived.printFunctionInfo() {
+        println("Derived extension function in DerivedCaller")
+    }
+}
+
+fun main() {
+    BaseCaller().call(Base())   // "Base extension function in BaseCaller"
+    BaseCaller().call(Derived())   // "Base extension function in BaseCaller"
+    DerivedCaller().call(Base())  // "Base extension function in DerivedCaller" - dispatch receiver is resolved virtually
+    DerivedCaller().call(Derived())  // "Base extension function in DerivedCaller" - extension receiver is resolved statically
+}
+```
+BaseCaller和DerivedCaller是分发者，其调用的具体是哪个扩展方法是多态的。但是Base和Derived作为扩展接受者，其扩展方法的调用是静态的。这个区别需要注意。
+
